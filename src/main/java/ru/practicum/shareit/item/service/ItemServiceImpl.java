@@ -18,15 +18,14 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final UserDao userDao;
-    private final ItemMapper itemMapper;
 
     @Override
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         User owner = userDao.getUserById(userId);
-        Item item = itemMapper.fromDtoToItem(itemDto);
+        Item item = ItemMapper.fromDtoToItem(itemDto);
         Item createdItem = itemDao.createItem(item);
         item.setOwner(owner);
-        return itemMapper.fromItemToDto(createdItem);
+        return ItemMapper.fromItemToDto(createdItem);
     }
 
     @Override
@@ -35,28 +34,28 @@ public class ItemServiceImpl implements ItemService {
         if (oldItem.getOwner().getId() != userId) {
             throw new AccessDeniedException("Пользователь не является владельцем объекта");
         }
-        Item itemToUpdate = itemMapper.fromDtoToItem(itemDto);
+        Item itemToUpdate = ItemMapper.fromDtoToItem(itemDto);
         itemToUpdate.setId(itemId);
         Item updatedItem = itemDao.updateItem(itemToUpdate);
-        return itemMapper.fromItemToDto(updatedItem);
+        return ItemMapper.fromItemToDto(updatedItem);
     }
 
     @Override
     public ItemDto getById(long itemId) {
-        return itemMapper.fromItemToDto(itemDao.getById(itemId));
+        return ItemMapper.fromItemToDto(itemDao.getById(itemId));
     }
 
     @Override
     public List<ItemDto> getBySearch(String search) {
         return itemDao.getBySearch(search)
-                .stream().map(itemMapper::fromItemToDto)
+                .stream().map(ItemMapper::fromItemToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemDto> getAllByOwner(long ownerId) {
         return itemDao.getAllByOwner(ownerId)
-                .stream().map(itemMapper::fromItemToDto)
+                .stream().map(ItemMapper::fromItemToDto)
                 .collect(Collectors.toList());
     }
 

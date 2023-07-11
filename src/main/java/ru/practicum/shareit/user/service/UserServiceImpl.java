@@ -14,35 +14,33 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
-    private final UserMapper userMapper;
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = userMapper.fromDtoToUser(userDto);
+        User user = UserMapper.fromDtoToUser(userDto);
         User createdUser = userDao.createUser(user);
-        return userMapper.fromUserToDto(createdUser);
+        return UserMapper.fromUserToDto(createdUser);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
-        //User oldUser = userDao.getUserById(userId);
-        User userToUpdate = userMapper.fromDtoToUser(userDto);
+        User userToUpdate = UserMapper.fromDtoToUser(userDto);
         userToUpdate.setId(userId);
         User updatedUser = userDao.updateUser(userToUpdate, userId);
 
-        return userMapper.fromUserToDto(updatedUser);
+        return UserMapper.fromUserToDto(updatedUser);
     }
 
     @Override
     public UserDto getUserById(long id) {
-        return userMapper.fromUserToDto(userDao.getUserById(id));
+        return UserMapper.fromUserToDto(userDao.getUserById(id));
 
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         return userDao.getAllUsers()
-                .stream().map(userMapper::fromUserToDto)
+                .stream().map(UserMapper::fromUserToDto)
                 .collect(Collectors.toList());
     }
 
