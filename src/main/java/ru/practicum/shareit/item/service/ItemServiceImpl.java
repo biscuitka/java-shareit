@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.OwnerException;
+import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -33,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
         Item oldItem = itemDao.getById(itemId);
         if (oldItem.getOwner().getId() != userId) {
-            throw new OwnerException("Пользователь не является владельцем объекта");
+            throw new AccessDeniedException("Пользователь не является владельцем объекта");
         }
         Item itemToUpdate = itemMapper.fromDtoToItem(itemDto);
         itemToUpdate.setId(itemId);
