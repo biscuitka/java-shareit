@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.constants.HeaderConstants;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -17,15 +18,16 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ItemDto createItem(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
                               @Valid @RequestBody ItemDto itemDto) {
         log.info("Создание вещи: {}", itemDto);
         return itemService.createItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto, @PathVariable long itemId,
-                              @RequestHeader("X-Sharer-User-Id") long userId) {
+    public ItemDto updateItem(@RequestBody ItemDto itemDto,
+                              @PathVariable long itemId,
+                              @RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId) {
         log.info("Обновление вещи: {}", itemDto);
         return itemService.updateItem(itemDto, itemId, userId);
     }
@@ -36,7 +38,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDto> getAllByOwner(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId) {
         return itemService.getAllByOwner(userId);
     }
 
