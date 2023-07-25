@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.HeaderConstants;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -24,17 +25,25 @@ public class ItemController {
         return itemService.createItem(itemDto, userId);
     }
 
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
+                                    @Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable long itemId) {
+        return itemService.createComment(userId, commentDto, itemId);
+    }
+
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto,
-                              @PathVariable long itemId,
-                              @RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId) {
+    public ItemDto updateItem(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
+                              @RequestBody ItemDto itemDto,
+                              @PathVariable long itemId) {
         log.info("Обновление вещи: {}", itemDto);
         return itemService.updateItem(itemDto, itemId, userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable long itemId) {
-        return itemService.getById(itemId);
+    public ItemDto getById(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
+                           @PathVariable long itemId) {
+        return itemService.getById(itemId, userId);
     }
 
     @GetMapping
