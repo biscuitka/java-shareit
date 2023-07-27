@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
@@ -28,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
         try {
-            User userInRepo = User.getValidatedUser(userRepository, userId);
+            User userInRepo = getValidatedUser(userRepository, userId);
             if (userDto.getName() != null) {
                 userInRepo.setName(userDto.getName());
             }
@@ -43,13 +46,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserById(long userId) {
-        User user = User.getValidatedUser(userRepository, userId);
+        User user = getValidatedUser(userRepository, userId);
         return UserMapper.fromUserToDto(user);
 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userRepository.findAll()
                 .stream().map(UserMapper::fromUserToDto)
@@ -59,5 +64,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(long userId) {
         userRepository.deleteById(userId);
+    }
+
+    public static User getValidatedUser(UserRepository userRepository, long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 }

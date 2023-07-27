@@ -43,7 +43,7 @@ public class BookingController {
     @GetMapping
     public List<BookingDtoOut> getAllBookingByUser(
             @RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
-            @RequestParam(required = false, defaultValue = HeaderConstants.DEFAULT_STATE_VALUE)
+            @RequestParam(defaultValue = HeaderConstants.DEFAULT_STATE_VALUE)
             StateOfBooking state) {
         return bookingService.getAllBookingByUser(userId, state);
     }
@@ -51,7 +51,7 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDtoOut> getAllBookingsByItemOwner(
             @RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
-            @RequestParam(required = false, defaultValue = HeaderConstants.DEFAULT_STATE_VALUE)
+            @RequestParam(defaultValue = HeaderConstants.DEFAULT_STATE_VALUE)
             StateOfBooking state) {
         return bookingService.getAllBookingsByItemOwner(userId, state);
     }

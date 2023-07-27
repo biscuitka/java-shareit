@@ -1,12 +1,12 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Data;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.repository.UserRepository;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
 public class User {
@@ -17,9 +17,4 @@ public class User {
     @Column(name = "user_name")
     private String name;
     private String email;
-
-    public static User getValidatedUser(UserRepository userRepository, long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-    }
 }

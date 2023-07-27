@@ -3,6 +3,9 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class ItemMapper {
     public static Item fromDtoToItem(ItemDto itemDto) {
         Item item = new Item();
@@ -20,5 +23,11 @@ public class ItemMapper {
         dto.setDescription(item.getDescription());
         dto.setAvailable(item.getAvailable());
         return dto;
+    }
+
+    public static List<ItemDto> fromListOfItemToDto(List<Item> items) {
+        return items.stream()
+                .map(ItemMapper::fromItemToDto)
+                .collect(Collectors.toList());
     }
 }
