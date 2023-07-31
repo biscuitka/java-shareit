@@ -42,11 +42,8 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Владелец не может бронировать свою вещь");
         }
         List<Booking> bookings = bookingRepository.findByItemIdAndStatus(item.getId(), StatusOfBooking.APPROVED);
-        boolean isConflicting = bookings.stream().anyMatch(booking ->
-                booking.getStart().isAfter(bookingDtoIn.getStart()) &&
-                        booking.getStart().isBefore(bookingDtoIn.getEnd()) &&
-                        booking.getEnd().isAfter(bookingDtoIn.getStart()) &&
-                        booking.getEnd().isBefore(bookingDtoIn.getEnd())
+        boolean isConflicting = !bookings.stream().allMatch(booking ->
+                !booking.getStart().isBefore(bookingDtoIn.getEnd()) || !booking.getEnd().isAfter(bookingDtoIn.getEnd())
         );
         if (isConflicting) {
             throw new BookingAvailableException("Вещь забронирована на запрашиваемые даты");

@@ -1,5 +1,8 @@
 package ru.practicum.shareit.item.comment;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class CommentMapper {
     public static Comment fromDtoToComment(CommentDto commentDto) {
         Comment comment = new Comment();
@@ -14,5 +17,11 @@ public class CommentMapper {
         dto.setAuthorName(comment.getAuthor().getName());
         dto.setCreated(comment.getCreated());
         return dto;
+    }
+
+    public static List<CommentDto> fromListOfCommentToDto(List<Comment> comments) {
+        return comments.stream()
+                .map(CommentMapper::fromCommentToDto)
+                .collect(Collectors.toList());
     }
 }

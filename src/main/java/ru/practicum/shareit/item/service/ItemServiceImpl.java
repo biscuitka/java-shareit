@@ -23,10 +23,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -149,15 +146,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setCommentsForListItems(List<ItemDto> list) {
-        List<Comment> comments = commentRepository.findAll();
-        List<CommentDto> commentDtos = comments.stream()
-                .map(CommentMapper::fromCommentToDto)
+        List<Long> itemIds = list.stream()
+                .map(ItemDto::getId)
                 .collect(Collectors.toList());
+
+        Map<Long, List<Comment>> commentsMap = commentRepository.findAllByItemIdIn(itemIds)
+                .stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+
         list.forEach(itemDto -> {
-            List<CommentDto> itemComments = commentDtos.stream()
-                    .filter(commentDto -> itemDto.getComments().contains(commentDto))
-                    .collect(Collectors.toList());
-            itemDto.setComments(itemComments);
+            List<Comment> itemComments = commentsMap.getOrDefault(itemDto.getId(), Collections.emptyList());
+            itemDto.setComments(CommentMapper.fromListOfCommentToDto(itemComments));
         });
     }
 
@@ -177,11 +176,11 @@ public class ItemServiceImpl implements ItemService {
                 Booking nextBooking = bookings.stream()
                         .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
                         .filter(booking -> booking.getStatus().equals(StatusOfBooking.APPROVED))
-                        .findFirst()
+                        .min(Comparator.comparing(Booking::getStart))
                         .orElse(null);
                 Booking lastBooking = bookings.stream()
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
-                        .max(Comparator.comparing(Booking::getEnd))
+                        .max(Comparator.comparing(Booking::getStart))
                         .orElse(null);
                 dto.setNextBooking(nextBooking != null ? new BookingDtoShort(nextBooking) : null);
                 dto.setLastBooking(lastBooking != null ? new BookingDtoShort(lastBooking) : null);
