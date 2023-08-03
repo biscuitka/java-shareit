@@ -9,9 +9,9 @@ public interface ItemDao {
 
     Item updateItem(Item item);
 
-    Item getById(long itemId);
-
     List<Item> getBySearch(String search);
+
+    Item getById(long itemId);
 
     List<Item> getAllByOwner(long ownerId);
 

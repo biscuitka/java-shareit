@@ -6,18 +6,38 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exception.AccessDeniedException;
-import ru.practicum.shareit.exception.ExistException;
-import ru.practicum.shareit.exception.NotFoundException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.shareit.exception.*;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exp) {
         log.error("Ошибка валидации", exp);
         return new ErrorResponse(exp.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBookingAvailableException(final BookingAvailableException exp) {
+        log.error("Ошибка при бронировании", exp);
+        return new ErrorResponse(exp.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIncorrectException(final IncorrectException exp) {
+        log.error("Некорректный запрос");
+        return new ErrorResponse(exp.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exp) {
+        log.error("Ошибка при запросе");
+        return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS");
     }
 
     @ExceptionHandler

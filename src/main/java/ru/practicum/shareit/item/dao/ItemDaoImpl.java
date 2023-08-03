@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.dao;
 
-import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Repository
+
 public class ItemDaoImpl implements ItemDao {
     private final Map<Long, Item> itemStorage = new HashMap<>();
     private long idGenerator = 1;
