@@ -22,7 +22,7 @@ class BookingMapperTest {
     private JacksonTester<BookingDtoOut> bookingDtoOutJacksonTester;
 
     @Test
-    void BookingDtoOutTest() throws IOException {
+    void bookingDtoOutTest() throws IOException {
         UserDtoShort userDto = new UserDtoShort();
         userDto.setId(8L);
 

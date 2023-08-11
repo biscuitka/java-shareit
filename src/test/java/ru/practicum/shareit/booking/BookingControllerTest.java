@@ -34,7 +34,7 @@ class BookingControllerTest {
     MockMvc mockMvc;
     @Autowired
     ObjectMapper objectMapper;
-    final String BOOKINGS = "/bookings";
+    final String bookingsPath = "/bookings";
 
     @Test
     void createBooking() throws Exception {
@@ -44,7 +44,7 @@ class BookingControllerTest {
         when(bookingService.createBooking(eq(DataTest.userId), any(BookingDtoIn.class)))
                 .thenReturn(bookingDtoOut);
 
-        mockMvc.perform(post(BOOKINGS)
+        mockMvc.perform(post(bookingsPath)
                         .header(HeaderConstants.X_SHARER_USER_ID, DataTest.userId)
                         .content(objectMapper.writeValueAsString(bookingDtoIn))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -70,7 +70,7 @@ class BookingControllerTest {
         when(bookingService.updateStatus(eq(DataTest.userId), anyBoolean(), eq(bookingDtoOut.getId())))
                 .thenReturn(bookingDtoOut);
 
-        mockMvc.perform(patch(BOOKINGS + "/" + bookingDtoOut.getId())
+        mockMvc.perform(patch(bookingsPath + "/" + bookingDtoOut.getId())
                         .header(HeaderConstants.X_SHARER_USER_ID, DataTest.userId)
                         .param("approved", "true"))
                 .andExpect(status().isOk())
@@ -93,7 +93,7 @@ class BookingControllerTest {
         when(bookingService.getBooking(eq(DataTest.userId), eq(bookingDtoOut.getId())))
                 .thenReturn(bookingDtoOut);
 
-        mockMvc.perform(get(BOOKINGS + "/" + bookingDtoOut.getId())
+        mockMvc.perform(get(bookingsPath + "/" + bookingDtoOut.getId())
                         .header(HeaderConstants.X_SHARER_USER_ID, DataTest.userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(bookingDtoOut.getId()))
@@ -117,7 +117,7 @@ class BookingControllerTest {
         when(bookingService.getAllBookingByUser(eq(DataTest.userId), any(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoOutList);
 
-        mockMvc.perform(get(BOOKINGS)
+        mockMvc.perform(get(bookingsPath)
                         .header(HeaderConstants.X_SHARER_USER_ID, DataTest.userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookingDtoOut1.getId()))
@@ -148,7 +148,7 @@ class BookingControllerTest {
         when(bookingService.getAllBookingsByItemOwner(eq(DataTest.userId), any(), anyInt(), anyInt()))
                 .thenReturn(bookingDtoOutList);
 
-        mockMvc.perform(get(BOOKINGS + "/owner")
+        mockMvc.perform(get(bookingsPath + "/owner")
                         .header(HeaderConstants.X_SHARER_USER_ID, DataTest.userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookingDtoOut1.getId()))
