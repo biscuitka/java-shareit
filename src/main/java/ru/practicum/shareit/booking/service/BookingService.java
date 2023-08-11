@@ -14,7 +14,7 @@ public interface BookingService {
 
     BookingDtoOut getBooking(long userId, long bookingId);
 
-    List<BookingDtoOut> getAllBookingByUser(long userId, StateOfBooking stateOfBooking);
+    List<BookingDtoOut> getAllBookingByUser(long userId, StateOfBooking stateOfBooking, int from, int size);
 
-    List<BookingDtoOut> getAllBookingsByItemOwner(long userId, StateOfBooking stateOfBooking);
+    List<BookingDtoOut> getAllBookingsByItemOwner(long userId, StateOfBooking stateOfBooking, int from, int size);
 }

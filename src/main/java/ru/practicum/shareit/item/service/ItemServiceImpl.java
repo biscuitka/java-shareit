@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
@@ -18,6 +21,9 @@ import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
@@ -34,12 +40,18 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository requestRepository;
 
     @Override
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         User owner = UserServiceImpl.getValidatedUser(userRepository, userId);
         Item item = ItemMapper.fromDtoToItem(itemDto);
         item.setOwner(owner);
+        Long requestId = itemDto.getRequestId();
+        if (requestId != null) {
+            ItemRequest request = ItemRequestServiceImpl.getValidatedRequest(requestRepository, requestId);
+            item.setItemRequest(request);
+        }
         Item createdItem = itemRepository.save(item);
 
         return ItemMapper.fromItemToDto(createdItem);
@@ -51,8 +63,9 @@ public class ItemServiceImpl implements ItemService {
         Item item = getValidatedItem(itemRepository, itemId);
         Comment comment = CommentMapper.fromDtoToComment(commentDto);
 
-        if (bookingRepository.findAllByItemIdAndBookerIdAndEndBeforeAndStatus(itemId, userId, LocalDateTime.now(), StatusOfBooking.APPROVED).isEmpty()) {
-            throw new IncorrectException("Нельзя оставить отзыв на вещь которую не бронировали");
+        if (bookingRepository.findAllByItemIdAndBookerIdAndEndBeforeAndStatus(
+                itemId, userId, LocalDateTime.now(), StatusOfBooking.APPROVED).isEmpty()) {
+            throw new IncorrectException("Нельзя оставить отзыв на вещь которую не бронировали", HttpStatus.BAD_REQUEST);
         }
         comment.setAuthor(user);
         comment.setItem(item);
@@ -67,7 +80,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
         Item oldItem = getValidatedItem(itemRepository, itemId);
         if (oldItem.getOwner().getId() != userId) {
-            throw new AccessDeniedException("Пользователь не является владельцем объекта");
+            throw new AccessDeniedException("Пользователь не является владельцем объекта", HttpStatus.FORBIDDEN);
         }
         if (itemDto.getName() != null) {
             oldItem.setName(itemDto.getName());
@@ -97,11 +110,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getBySearch(String search) {
+    public List<ItemDto> getBySearch(String search, int from, int size) {
         if (search.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Item> items = itemRepository.findAllBySearch(search);
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findAllBySearch(search, pageable);
         return items.stream()
                 .map(ItemMapper::fromItemToDto)
                 .collect(Collectors.toList());
@@ -109,8 +123,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getAllByOwner(long ownerId) {
-        List<Item> items = itemRepository.findALLByOwnerIdOrderByIdAsc(ownerId);
+    public List<ItemDto> getAllByOwner(long ownerId, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findALLByOwnerIdOrderByIdAsc(ownerId, pageable);
         List<ItemDto> itemDtos = ItemMapper.fromListOfItemToDto(items);
         setBookingsForList(itemDtos);
         setCommentsForListItems(itemDtos);
@@ -190,7 +205,7 @@ public class ItemServiceImpl implements ItemService {
 
     public static Item getValidatedItem(ItemRepository itemRepository, long itemId) {
         return itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена", HttpStatus.NOT_FOUND));
     }
 }
 

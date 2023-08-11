@@ -14,9 +14,9 @@ public interface ItemService {
 
     ItemDto getById(long itemId, long userId);
 
-    List<ItemDto> getBySearch(String search);
+    List<ItemDto> getBySearch(String search, int from, int size);
 
-    List<ItemDto> getAllByOwner(long ownerId);
+    List<ItemDto> getAllByOwner(long ownerId, int from, int size);
 
     void deleteById(long itemId);
 

@@ -24,8 +24,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = UserMapper.fromDtoToUser(userDto);
-        User createdUser = userRepository.save(user);
-        return UserMapper.fromUserToDto(createdUser);
+        try {
+            User createdUser = userRepository.save(user);
+            return UserMapper.fromUserToDto(createdUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ошибка при создании пользователя", e);
+        }
     }
 
     @Override
@@ -68,6 +72,6 @@ public class UserServiceImpl implements UserService {
 
     public static User getValidatedUser(UserRepository userRepository, long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
     }
 }

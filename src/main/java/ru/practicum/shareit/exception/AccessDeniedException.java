@@ -1,7 +1,16 @@
 package ru.practicum.shareit.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class AccessDeniedException extends RuntimeException {
-    public AccessDeniedException(String message) {
+    private HttpStatus httpStatus;
+
+    public AccessDeniedException(String message, HttpStatus httpStatus) {
         super(message);
+        this.httpStatus = httpStatus;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 }

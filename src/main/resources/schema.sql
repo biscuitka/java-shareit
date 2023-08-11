@@ -33,7 +33,15 @@ CREATE TABLE IF NOT EXISTS comments (
     created TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT fk_comments_to_items FOREIGN KEY(item_id) REFERENCES items(item_id),
     CONSTRAINT fk_comments_to_users FOREIGN KEY(author_id) REFERENCES users(user_id)
-);
+    );
+
+CREATE TABLE IF NOT EXISTS requests (
+    request_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    request_description VARCHAR(1000) NOT NULL,
+    requester_id BIGINT REFERENCES users (user_id) NOT NULL,
+    create_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT fk_requests_to_users FOREIGN KEY(requester_id) REFERENCES users(user_id)
+    );
 
 
 
