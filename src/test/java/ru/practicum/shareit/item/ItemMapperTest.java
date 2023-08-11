@@ -8,6 +8,9 @@ import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoRequested;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.util.DataTest;
 import ru.practicum.shareit.util.TestConstants;
 
@@ -20,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ItemMapperTest {
     @Autowired
     private JacksonTester<ItemDto> itemDtoJacksonTester;
+    @Autowired
+    private JacksonTester<ItemDtoRequested> itemDtoRequestedJacksonTester;
     @Autowired
     private JacksonTester<CommentDto> commentDtoJacksonTester;
 
@@ -61,4 +66,17 @@ class ItemMapperTest {
                 .isEqualTo(DataTest.time.format(TestConstants.DATE_TIME_FORMATTER));
     }
 
+    @Test
+    void itemDtoRequestedTest() throws IOException {
+        Item item = DataTest.testItem1();
+        ItemRequest itemRequest = DataTest.testItemRequest1();
+        item.setItemRequest(itemRequest);
+        ItemDtoRequested itemDtoRequested = new ItemDtoRequested(item);
+
+        JsonContent<ItemDtoRequested> content = itemDtoRequestedJacksonTester.write(itemDtoRequested);
+        assertThat(content).extractingJsonPathNumberValue("$.id").isEqualTo(1);
+        assertThat(content).extractingJsonPathStringValue("$.name").isEqualTo("Меч");
+        assertThat(content).extractingJsonPathStringValue("$.description")
+                .isEqualTo("Улучшенный стальной меч школы волка");
+    }
 }
