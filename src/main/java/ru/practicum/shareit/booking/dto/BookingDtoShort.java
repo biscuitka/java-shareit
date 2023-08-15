@@ -11,9 +11,4 @@ import ru.practicum.shareit.booking.model.Booking;
 public class BookingDtoShort {
     private Long id;
     private Long bookerId;
-
-    public BookingDtoShort(Booking booking) {
-        setId(booking.getId());
-        setBookerId(booking.getBooker().getId());
-    }
 }

@@ -11,9 +11,4 @@ import ru.practicum.shareit.item.model.Item;
 public class ItemDtoShort {
     private Long id;
     private String name;
-
-    public ItemDtoShort(Item item) {
-        setId(item.getId());
-        setName(item.getName());
-    }
 }

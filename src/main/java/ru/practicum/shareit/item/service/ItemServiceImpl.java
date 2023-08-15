@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusOfBooking;
@@ -136,7 +137,7 @@ public class ItemServiceImpl implements ItemService {
         Booking nextBooking = bookingRepository.findFirstByItemIdAndStatusAndStartAfterOrderByStartAsc(itemDto.getId(),
                 StatusOfBooking.APPROVED, LocalDateTime.now());
         if (nextBooking != null) {
-            itemDto.setNextBooking(new BookingDtoShort(nextBooking));
+            itemDto.setNextBooking(BookingMapper.fromBookingToBookingDtoShort(nextBooking));
         }
     }
 
@@ -144,7 +145,7 @@ public class ItemServiceImpl implements ItemService {
         Booking lastBooking = bookingRepository.findFirstByItemIdAndStartBeforeOrderByStartDesc(itemDto.getId(),
                 LocalDateTime.now());
         if (lastBooking != null) {
-            itemDto.setLastBooking(new BookingDtoShort(lastBooking));
+            itemDto.setLastBooking(BookingMapper.fromBookingToBookingDtoShort(lastBooking));
         }
     }
 
@@ -192,8 +193,8 @@ public class ItemServiceImpl implements ItemService {
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                         .max(Comparator.comparing(Booking::getStart))
                         .orElse(null);
-                dto.setNextBooking(nextBooking != null ? new BookingDtoShort(nextBooking) : null);
-                dto.setLastBooking(lastBooking != null ? new BookingDtoShort(lastBooking) : null);
+                dto.setNextBooking(nextBooking != null ? BookingMapper.fromBookingToBookingDtoShort(nextBooking) : null);
+                dto.setLastBooking(lastBooking != null ? BookingMapper.fromBookingToBookingDtoShort(lastBooking) : null);
             }
         });
     }

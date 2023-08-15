@@ -71,7 +71,7 @@ class ItemMapperTest {
         Item item = DataTest.testItem1();
         ItemRequest itemRequest = DataTest.testItemRequest1();
         item.setItemRequest(itemRequest);
-        ItemDtoRequested itemDtoRequested = new ItemDtoRequested(item);
+        ItemDtoRequested itemDtoRequested = ItemMapper.fromItemToItemDtoRequested(item);
 
         JsonContent<ItemDtoRequested> content = itemDtoRequestedJacksonTester.write(itemDtoRequested);
         assertThat(content).extractingJsonPathNumberValue("$.id").isEqualTo(1);

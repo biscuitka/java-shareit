@@ -10,8 +10,4 @@ import ru.practicum.shareit.user.model.User;
 @NoArgsConstructor
 public class UserDtoShort {
     private Long id;
-
-    public UserDtoShort(User user) {
-        setId(user.getId());
-    }
 }
