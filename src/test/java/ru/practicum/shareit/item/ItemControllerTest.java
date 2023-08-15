@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.constants.HeaderConstants;
@@ -131,7 +132,7 @@ class ItemControllerTest {
         ItemDto itemDto2 = DataTest.testItemDto2();
         List<ItemDto> itemDtoList = List.of(itemDto1, itemDto2);
 
-        when(itemService.getAllByOwner(eq(DataTest.userId), anyInt(), anyInt()))
+        when(itemService.getAllByOwner(eq(DataTest.userId), any(Pageable.class)))
                 .thenReturn(itemDtoList);
 
         mockMvc.perform(get("/items")
@@ -148,7 +149,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[1].available")
                         .value(itemDto2.getAvailable()));
 
-        verify(itemService, times(1)).getAllByOwner(eq(DataTest.userId), anyInt(), anyInt());
+        verify(itemService, times(1)).getAllByOwner(eq(DataTest.userId), any(Pageable.class));
         verifyNoMoreInteractions(itemService);
     }
 
@@ -158,7 +159,7 @@ class ItemControllerTest {
         ItemDto itemDto2 = DataTest.testItemDto2();
         List<ItemDto> itemDtoList = List.of(itemDto1, itemDto2);
 
-        when(itemService.getBySearch(anyString(), anyInt(), anyInt()))
+        when(itemService.getBySearch(anyString(), any(Pageable.class)))
                 .thenReturn(itemDtoList);
 
         mockMvc.perform(get("/items/search")
@@ -175,7 +176,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[1].available")
                         .value(itemDto2.getAvailable()));
 
-        verify(itemService, times(1)).getBySearch(anyString(), anyInt(), anyInt());
+        verify(itemService, times(1)).getBySearch(anyString(),any(Pageable.class));
         verifyNoMoreInteractions(itemService);
     }
 

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.constants.HeaderConstants;
@@ -86,7 +87,7 @@ class ItemRequestControllerTest {
         RequestDtoWithItemsOut requestDto2 = DataTest.testRequestDtoWithItemsOut2();
         List<RequestDtoWithItemsOut> requestDtoWithItemsOutList = List.of(requestDto1, requestDto2);
 
-        when(itemRequestService.getAllByOwner(eq(DataTest.userId), anyInt(), anyInt()))
+        when(itemRequestService.getAllByOwner(eq(DataTest.userId), any(Pageable.class)))
                 .thenReturn(requestDtoWithItemsOutList);
 
         mockMvc.perform(get("/requests")
@@ -103,7 +104,7 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[1].created")
                         .value(requestDto2.getCreated().format(TestConstants.DATE_TIME_FORMATTER)));
 
-        verify(itemRequestService, times(1)).getAllByOwner(eq(DataTest.userId), anyInt(), anyInt());
+        verify(itemRequestService, times(1)).getAllByOwner(eq(DataTest.userId), any(Pageable.class));
         verifyNoMoreInteractions(itemRequestService);
     }
 
@@ -113,7 +114,7 @@ class ItemRequestControllerTest {
         RequestDtoWithItemsOut requestDto2 = DataTest.testRequestDtoWithItemsOut2();
         List<RequestDtoWithItemsOut> requestDtoWithItemsOutList = List.of(requestDto1, requestDto2);
 
-        when(itemRequestService.getAll(eq(DataTest.userId), anyInt(), anyInt()))
+        when(itemRequestService.getAll(eq(DataTest.userId),any(Pageable.class)))
                 .thenReturn(requestDtoWithItemsOutList);
 
         mockMvc.perform(get("/requests/all")
@@ -130,7 +131,7 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[1].created")
                         .value(requestDto2.getCreated().format(TestConstants.DATE_TIME_FORMATTER)));
 
-        verify(itemRequestService, times(1)).getAll(eq(DataTest.userId), anyInt(), anyInt());
+        verify(itemRequestService, times(1)).getAll(eq(DataTest.userId), any(Pageable.class));
         verifyNoMoreInteractions(itemRequestService);
     }
 }

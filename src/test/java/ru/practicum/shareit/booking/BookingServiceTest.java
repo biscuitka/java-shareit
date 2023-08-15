@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import ru.practicum.shareit.booking.dto.BookingDtoIn;
@@ -23,6 +24,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.DataTest;
+import ru.practicum.shareit.util.TestConstants;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -480,17 +482,17 @@ class BookingServiceTest {
                 eq(booker.getId()), eq(StatusOfBooking.REJECTED), any(Pageable.class))).thenReturn(new ArrayList<>());
 
         List<BookingDtoOut> bookingDtoOutAllList = bookingService
-                .getAllBookingByUser(booker.getId(), StateOfBooking.ALL, 0, 10);
+                .getAllBookingByUser(booker.getId(), StateOfBooking.ALL, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutCurrentList = bookingService
-                .getAllBookingByUser(booker.getId(), StateOfBooking.CURRENT, 0, 10);
+                .getAllBookingByUser(booker.getId(), StateOfBooking.CURRENT, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutPastList = bookingService
-                .getAllBookingByUser(booker.getId(), StateOfBooking.PAST, 0, 10);
+                .getAllBookingByUser(booker.getId(), StateOfBooking.PAST, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutFutureList = bookingService
-                .getAllBookingByUser(booker.getId(), StateOfBooking.FUTURE, 0, 10);
+                .getAllBookingByUser(booker.getId(), StateOfBooking.FUTURE, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutWaitingList = bookingService
-                .getAllBookingByUser(booker.getId(), StateOfBooking.WAITING, 0, 10);
+                .getAllBookingByUser(booker.getId(), StateOfBooking.WAITING, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutRejectedList = bookingService
-                .getAllBookingByUser(booker.getId(), StateOfBooking.REJECTED, 0, 10);
+                .getAllBookingByUser(booker.getId(), StateOfBooking.REJECTED, TestConstants.PAGEABLE);
 
         assertThat(bookingDtoOutAllList.size(), equalTo(3));
         assertThat(bookingDtoOutCurrentList.size(), equalTo(0));
@@ -558,17 +560,17 @@ class BookingServiceTest {
                 eq(owner.getId()), eq(StatusOfBooking.REJECTED), any(Pageable.class))).thenReturn(new ArrayList<>());
 
         List<BookingDtoOut> bookingDtoOutAllList = bookingService
-                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.ALL, 0, 10);
+                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.ALL, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutCurrentList = bookingService
-                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.CURRENT, 0, 10);
+                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.CURRENT, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutPastList = bookingService
-                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.PAST, 0, 10);
+                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.PAST, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutFutureList = bookingService
-                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.FUTURE, 0, 10);
+                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.FUTURE, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutWaitingList = bookingService
-                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.WAITING, 0, 10);
+                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.WAITING, TestConstants.PAGEABLE);
         List<BookingDtoOut> bookingDtoOutRejectedList = bookingService
-                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.REJECTED, 0, 10);
+                .getAllBookingsByItemOwner(owner.getId(), StateOfBooking.REJECTED, TestConstants.PAGEABLE);
 
         assertThat(bookingDtoOutAllList.size(), equalTo(3));
         assertThat(bookingDtoOutCurrentList.size(), equalTo(0));

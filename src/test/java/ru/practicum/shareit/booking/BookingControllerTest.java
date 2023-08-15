@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDtoIn;
@@ -114,7 +115,7 @@ class BookingControllerTest {
         BookingDtoOut bookingDtoOut2 = DataTest.testBookingDtoOut2();
         List<BookingDtoOut> bookingDtoOutList = List.of(bookingDtoOut1, bookingDtoOut2);
 
-        when(bookingService.getAllBookingByUser(eq(DataTest.userId), any(), anyInt(), anyInt()))
+        when(bookingService.getAllBookingByUser(eq(DataTest.userId), any(),any(Pageable.class)))
                 .thenReturn(bookingDtoOutList);
 
         mockMvc.perform(get(bookingsPath)
@@ -134,7 +135,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[1].status").value(bookingDtoOut2.getStatus().toString()));
 
         verify(bookingService, times(1))
-                .getAllBookingByUser(eq(DataTest.userId), any(), anyInt(), anyInt());
+                .getAllBookingByUser(eq(DataTest.userId), any(), any(Pageable.class));
 
         verifyNoMoreInteractions(bookingService);
     }
@@ -145,7 +146,7 @@ class BookingControllerTest {
         BookingDtoOut bookingDtoOut2 = DataTest.testBookingDtoOut2();
         List<BookingDtoOut> bookingDtoOutList = List.of(bookingDtoOut1, bookingDtoOut2);
 
-        when(bookingService.getAllBookingsByItemOwner(eq(DataTest.userId), any(), anyInt(), anyInt()))
+        when(bookingService.getAllBookingsByItemOwner(eq(DataTest.userId), any(), any(Pageable.class)))
                 .thenReturn(bookingDtoOutList);
 
         mockMvc.perform(get(bookingsPath + "/owner")
@@ -165,7 +166,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[1].status").value(bookingDtoOut2.getStatus().toString()));
 
         verify(bookingService, times(1))
-                .getAllBookingsByItemOwner(eq(DataTest.userId), any(), anyInt(), anyInt());
+                .getAllBookingsByItemOwner(eq(DataTest.userId), any(), any(Pageable.class));
 
         verifyNoMoreInteractions(bookingService);
     }

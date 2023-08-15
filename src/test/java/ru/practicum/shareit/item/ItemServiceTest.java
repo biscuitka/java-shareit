@@ -26,6 +26,7 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.DataTest;
+import ru.practicum.shareit.util.TestConstants;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -342,7 +343,7 @@ class ItemServiceTest {
 
         when(itemRepository.findAllBySearch(eq(search), any(Pageable.class))).thenReturn(items);
 
-        List<ItemDto> itemDtoList = itemService.getBySearch(search, 0, 10);
+        List<ItemDto> itemDtoList = itemService.getBySearch(search, TestConstants.PAGEABLE);
         assertThat(itemDtoList.size(), equalTo(2));
 
         assertThat(itemDtoList.get(0).getId(), equalTo(item1.getId()));
@@ -361,7 +362,7 @@ class ItemServiceTest {
 
     @Test
     void getBySearchWithoutTextTest() {
-        List<ItemDto> itemDtoList = itemService.getBySearch("", 0, 10);
+        List<ItemDto> itemDtoList = itemService.getBySearch("", TestConstants.PAGEABLE);
         assertThat(itemDtoList.size(), equalTo(0));
         verifyNoMoreInteractions(itemRepository);
     }
@@ -400,7 +401,7 @@ class ItemServiceTest {
         when(bookingRepository.findAllByItemIdIn(itemIds)).thenReturn(item1Bookings);
         when(commentRepository.findAllByItemIdIn(itemIds)).thenReturn(comments);
 
-        List<ItemDto> itemDtoList = itemService.getAllByOwner(owner.getId(), 0, 10);
+        List<ItemDto> itemDtoList = itemService.getAllByOwner(owner.getId(), TestConstants.PAGEABLE);
 
         assertThat(itemDtoList.size(), equalTo(2));
         assertThat(itemDtoList.get(0).getId(), equalTo(item1.getId()));

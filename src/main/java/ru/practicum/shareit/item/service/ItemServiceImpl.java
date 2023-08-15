@@ -110,11 +110,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getBySearch(String search, int from, int size) {
+    public List<ItemDto> getBySearch(String search, Pageable pageable) {
         if (search.isEmpty()) {
             return new ArrayList<>();
         }
-        Pageable pageable = PageRequest.of(from / size, size);
         List<Item> items = itemRepository.findAllBySearch(search, pageable);
         return items.stream()
                 .map(ItemMapper::fromItemToDto)
@@ -123,8 +122,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getAllByOwner(long ownerId, int from, int size) {
-        Pageable pageable = PageRequest.of(from / size, size);
+    public List<ItemDto> getAllByOwner(long ownerId, Pageable pageable) {
         List<Item> items = itemRepository.findALLByOwnerIdOrderByIdAsc(ownerId, pageable);
         List<ItemDto> itemDtos = ItemMapper.fromListOfItemToDto(items);
         setBookingsForList(itemDtos);

@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -93,10 +92,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDtoOut> getAllBookingByUser(long userId, StateOfBooking stateOfBooking, int from, int size) {
+    public List<BookingDtoOut> getAllBookingByUser(long userId, StateOfBooking stateOfBooking, Pageable pageable) {
         UserServiceImpl.getValidatedUser(userRepository, userId);
         LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = PageRequest.of(from / size, size);
         switch (stateOfBooking) {
             case ALL:
                 return BookingMapper.fromListOfBookingToDtoOut(bookingRepository
@@ -124,10 +122,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDtoOut> getAllBookingsByItemOwner(long userId, StateOfBooking stateOfBooking, int from, int size) {
+    public List<BookingDtoOut> getAllBookingsByItemOwner(long userId, StateOfBooking stateOfBooking, Pageable pageable) {
         UserServiceImpl.getValidatedUser(userRepository, userId);
         LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = PageRequest.of(from / size, size);
         switch (stateOfBooking) {
             case ALL:
                 return BookingMapper.fromListOfBookingToDtoOut(bookingRepository

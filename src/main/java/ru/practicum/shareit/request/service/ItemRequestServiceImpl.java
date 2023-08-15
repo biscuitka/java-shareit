@@ -53,9 +53,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RequestDtoWithItemsOut> getAllByOwner(long userId, int from, int size) {
+    public List<RequestDtoWithItemsOut> getAllByOwner(long userId, Pageable pageable) {
         UserServiceImpl.getValidatedUser(userRepository, userId);
-        Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> requests = requestRepository.findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)
@@ -68,9 +67,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RequestDtoWithItemsOut> getAll(long userId, int from, int size) {
+    public List<RequestDtoWithItemsOut> getAll(long userId, Pageable pageable) {
         UserServiceImpl.getValidatedUser(userRepository, userId);
-        Pageable pageable = PageRequest.of(from / size, size);
         List<ItemRequest> requests = requestRepository.findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable);
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)

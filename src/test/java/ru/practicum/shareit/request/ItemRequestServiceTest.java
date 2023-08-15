@@ -19,6 +19,7 @@ import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.DataTest;
+import ru.practicum.shareit.util.TestConstants;
 
 import java.util.List;
 import java.util.Optional;
@@ -119,7 +120,7 @@ class ItemRequestServiceTest {
         when(itemRepository.findAllByItemRequestIdIn(anyList())).thenReturn(List.of(item1, item2));
 
         List<RequestDtoWithItemsOut> requestDtoWithItemsOutList = itemRequestService
-                .getAllByOwner(requester.getId(), 0, 10);
+                .getAllByOwner(requester.getId(), TestConstants.PAGEABLE);
 
         assertThat(requestDtoWithItemsOutList.get(0).getId(), equalTo(itemRequest1.getId()));
         assertThat(requestDtoWithItemsOutList.get(0).getDescription(), equalTo(itemRequest1.getDescription()));
@@ -173,7 +174,7 @@ class ItemRequestServiceTest {
         when(itemRepository.findAllByItemRequestIdIn(anyList())).thenReturn(List.of(item1, item2));
 
         List<RequestDtoWithItemsOut> requestDtoWithItemsOutList = itemRequestService
-                .getAll(owner.getId(), 0, 10);
+                .getAll(owner.getId(), TestConstants.PAGEABLE);
 
         assertThat(requestDtoWithItemsOutList.get(0).getId(), equalTo(itemRequest1.getId()));
         assertThat(requestDtoWithItemsOutList.get(0).getDescription(), equalTo(itemRequest1.getDescription()));

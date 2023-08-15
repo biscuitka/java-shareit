@@ -2,6 +2,8 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.constants.HeaderConstants;
@@ -39,13 +41,15 @@ public class ItemRequestController {
     public List<RequestDtoWithItemsOut> getAllByOwner(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
                                                       @RequestParam(defaultValue = HeaderConstants.DEFAULT_FROM_VALUE) @Min(0) int from,
                                                       @RequestParam(defaultValue = HeaderConstants.DEFAULT_SIZE_VALUE) int size) {
-        return requestService.getAllByOwner(userId, from, size);
+        Pageable pageable = PageRequest.of(from / size, size);
+        return requestService.getAllByOwner(userId, pageable);
     }
 
     @GetMapping("/all")
     public List<RequestDtoWithItemsOut> getAllRequests(@RequestHeader(HeaderConstants.X_SHARER_USER_ID) long userId,
                                                        @RequestParam(defaultValue = HeaderConstants.DEFAULT_FROM_VALUE) @Min(0) int from,
                                                        @RequestParam(defaultValue = HeaderConstants.DEFAULT_SIZE_VALUE) int size) {
-        return requestService.getAll(userId, from, size);
+        Pageable pageable = PageRequest.of(from / size, size);
+        return requestService.getAll(userId, pageable);
     }
 }
