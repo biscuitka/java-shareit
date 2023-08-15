@@ -1,12 +1,9 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.RequestMapper;
@@ -17,7 +14,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.util.EntityValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,7 +31,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public RequestDtoOut createRequest(long userId, RequestDtoIn itemRequestDtoIn) {
-        User user = UserServiceImpl.getValidatedUser(userRepository, userId);
+        User user = EntityValidator.getValidatedUser(userRepository, userId);
         ItemRequest request = RequestMapper.fromDtoInToRequest(itemRequestDtoIn);
         request.setRequester(user);
         request.setCreated(LocalDateTime.now());
@@ -45,8 +42,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional(readOnly = true)
     public RequestDtoWithItemsOut getById(long userId, long requestId) {
-        UserServiceImpl.getValidatedUser(userRepository, userId);
-        ItemRequest itemRequest = getValidatedRequest(requestRepository, requestId);
+        EntityValidator.getValidatedUser(userRepository, userId);
+        ItemRequest itemRequest = EntityValidator.getValidatedRequest(requestRepository, requestId);
         List<Item> items = itemRepository.findAllByItemRequestId(requestId);
         return RequestMapper.fromRequestToDtoWithItemsOut(itemRequest, items);
     }
@@ -54,7 +51,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<RequestDtoWithItemsOut> getAllByOwner(long userId, Pageable pageable) {
-        UserServiceImpl.getValidatedUser(userRepository, userId);
+        EntityValidator.getValidatedUser(userRepository, userId);
         List<ItemRequest> requests = requestRepository.findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)
@@ -68,7 +65,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<RequestDtoWithItemsOut> getAll(long userId, Pageable pageable) {
-        UserServiceImpl.getValidatedUser(userRepository, userId);
+        EntityValidator.getValidatedUser(userRepository, userId);
         List<ItemRequest> requests = requestRepository.findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable);
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)
@@ -77,11 +74,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return requests.stream()
                 .map((ItemRequest request) -> RequestMapper.fromRequestToDtoWithItemsOut(request, items))
                 .collect(Collectors.toList());
-    }
-
-    public static ItemRequest getValidatedRequest(ItemRequestRepository requestRepository, long requestId) {
-        return requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Запрос не найден", HttpStatus.NOT_FOUND));
     }
 }
 

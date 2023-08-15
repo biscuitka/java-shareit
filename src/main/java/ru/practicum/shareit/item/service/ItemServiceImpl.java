@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import ru.practicum.shareit.booking.model.StatusOfBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.IncorrectException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -23,10 +21,9 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
-import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.util.EntityValidator;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -44,12 +41,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createItem(ItemDto itemDto, Long userId) {
-        User owner = UserServiceImpl.getValidatedUser(userRepository, userId);
+        User owner = EntityValidator.getValidatedUser(userRepository, userId);
         Item item = ItemMapper.fromDtoToItem(itemDto);
         item.setOwner(owner);
         Long requestId = itemDto.getRequestId();
         if (requestId != null) {
-            ItemRequest request = ItemRequestServiceImpl.getValidatedRequest(requestRepository, requestId);
+            ItemRequest request = EntityValidator.getValidatedRequest(requestRepository, requestId);
             item.setItemRequest(request);
         }
         Item createdItem = itemRepository.save(item);
@@ -59,8 +56,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(long userId, CommentDto commentDto, long itemId) {
-        User user = UserServiceImpl.getValidatedUser(userRepository, userId);
-        Item item = getValidatedItem(itemRepository, itemId);
+        User user = EntityValidator.getValidatedUser(userRepository, userId);
+        Item item = EntityValidator.getValidatedItem(itemRepository, itemId);
         Comment comment = CommentMapper.fromDtoToComment(commentDto);
 
         if (bookingRepository.findAllByItemIdAndBookerIdAndEndBeforeAndStatus(
@@ -78,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
-        Item oldItem = getValidatedItem(itemRepository, itemId);
+        Item oldItem = EntityValidator.getValidatedItem(itemRepository, itemId);
         if (oldItem.getOwner().getId() != userId) {
             throw new AccessDeniedException("Пользователь не является владельцем объекта", HttpStatus.FORBIDDEN);
         }
@@ -98,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemDto getById(long itemId, long userId) {
-        Item item = getValidatedItem(itemRepository, itemId);
+        Item item = EntityValidator.getValidatedItem(itemRepository, itemId);
         ItemDto itemDto = ItemMapper.fromItemToDto(item);
         setComments(itemDto);
         if (item.getOwner().getId() == userId) {
@@ -199,11 +196,6 @@ public class ItemServiceImpl implements ItemService {
                 dto.setLastBooking(lastBooking != null ? new BookingDtoShort(lastBooking) : null);
             }
         });
-    }
-
-    public static Item getValidatedItem(ItemRepository itemRepository, long itemId) {
-        return itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь не найдена", HttpStatus.NOT_FOUND));
     }
 }
 

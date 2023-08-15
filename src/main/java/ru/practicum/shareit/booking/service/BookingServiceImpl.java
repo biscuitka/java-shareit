@@ -17,10 +17,9 @@ import ru.practicum.shareit.exception.IncorrectException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.util.EntityValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,8 +34,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoOut createBooking(long userId, BookingDtoIn bookingDtoIn) {
-        User booker = UserServiceImpl.getValidatedUser(userRepository, userId);
-        Item item = ItemServiceImpl.getValidatedItem(itemRepository, bookingDtoIn.getItemId());
+        User booker = EntityValidator.getValidatedUser(userRepository, userId);
+        Item item = EntityValidator.getValidatedItem(itemRepository, bookingDtoIn.getItemId());
         if (!item.getAvailable()) {
             throw new BookingAvailableException("Вещь недоступна для бронирования", HttpStatus.BAD_REQUEST);
         }
@@ -62,8 +61,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoOut updateStatus(long userId, boolean approved, long bookingId) {
-        Booking booking = getValidatedBooking(bookingRepository, bookingId);
-        UserServiceImpl.getValidatedUser(userRepository, userId);
+        Booking booking = EntityValidator.getValidatedBooking(bookingRepository, bookingId);
+        EntityValidator.getValidatedUser(userRepository, userId);
 
         if (booking.getItem().getOwner().getId() != userId) {
             throw new NotFoundException("Только владелец может подтвердить/отклонить бронь", HttpStatus.NOT_FOUND);
@@ -81,8 +80,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public BookingDtoOut getBooking(long userId, long bookingId) {
-        Booking booking = getValidatedBooking(bookingRepository, bookingId);
-        UserServiceImpl.getValidatedUser(userRepository, userId);
+        Booking booking = EntityValidator.getValidatedBooking(bookingRepository, bookingId);
+        EntityValidator.getValidatedUser(userRepository, userId);
 
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
             throw new NotFoundException("Для данного пользователя бронирования не найдены", HttpStatus.NOT_FOUND);
@@ -93,7 +92,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDtoOut> getAllBookingByUser(long userId, StateOfBooking stateOfBooking, Pageable pageable) {
-        UserServiceImpl.getValidatedUser(userRepository, userId);
+        EntityValidator.getValidatedUser(userRepository, userId);
         LocalDateTime now = LocalDateTime.now();
         switch (stateOfBooking) {
             case ALL:
@@ -123,7 +122,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDtoOut> getAllBookingsByItemOwner(long userId, StateOfBooking stateOfBooking, Pageable pageable) {
-        UserServiceImpl.getValidatedUser(userRepository, userId);
+        EntityValidator.getValidatedUser(userRepository, userId);
         LocalDateTime now = LocalDateTime.now();
         switch (stateOfBooking) {
             case ALL:
@@ -147,10 +146,5 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new IncorrectException("Статус не существует", HttpStatus.BAD_REQUEST);
         }
-    }
-
-    public static Booking getValidatedBooking(BookingRepository bookingRepository, long bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование не найдено", HttpStatus.NOT_FOUND));
     }
 }
