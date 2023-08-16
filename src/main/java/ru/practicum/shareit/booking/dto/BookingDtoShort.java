@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.booking.model.Booking;
 
 @Getter
 @Setter

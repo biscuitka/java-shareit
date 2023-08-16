@@ -43,9 +43,8 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Владелец не может бронировать свою вещь", HttpStatus.NOT_FOUND);
         }
         List<Booking> bookings = bookingRepository.findByItemIdAndStatus(item.getId(), StatusOfBooking.APPROVED);
-        boolean isConflicting = !bookings.stream().allMatch(booking ->
-                booking.getStart().isAfter(bookingDtoIn.getEnd()) || booking.getEnd().isBefore(bookingDtoIn.getStart())
-        );
+
+        boolean isConflicting = bookings.stream().anyMatch(booking -> isBookingConflict(booking, bookingDtoIn));
         if (isConflicting) {
             throw new BookingAvailableException("Вещь забронирована на запрашиваемые даты", HttpStatus.BAD_REQUEST);
         }
@@ -57,6 +56,29 @@ public class BookingServiceImpl implements BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         return BookingMapper.fromBookingToDtoOut(savedBooking);
+    }
+
+    /**
+     * newStartInsideExisting - начало нового бронирования находится внутри существующего бронирования.
+     * newEndInsideExisting - конец нового бронирования находится внутри существующего бронирования.
+     * newBookingContainsExisting - новое бронирование пересекает существующее бронирование с обеих сторон (полностью содержит его).
+     * newBookingTouchesExisting - новое бронирование только касается существующего бронирования.
+     *
+     * @param existingBooking существующая бронь
+     * @param newBooking      новая бронь
+     * @return результат проверки на возможные пересечения во времени
+     */
+    private boolean isBookingConflict(Booking existingBooking, BookingDtoIn newBooking) {
+        boolean newStartInsideExisting = existingBooking.getStart().isBefore(newBooking.getStart())
+                && existingBooking.getEnd().isAfter(newBooking.getStart());
+        boolean newEndInsideExisting = existingBooking.getStart().isBefore(newBooking.getEnd())
+                && existingBooking.getEnd().isAfter(newBooking.getEnd());
+        boolean newBookingContainsExisting = newBooking.getStart().isBefore(existingBooking.getStart())
+                && newBooking.getEnd().isAfter(existingBooking.getEnd());
+        boolean newBookingTouchesExisting = existingBooking.getEnd().isEqual(newBooking.getStart())
+                || newBooking.getEnd().isEqual(existingBooking.getStart());
+
+        return newStartInsideExisting || newEndInsideExisting || newBookingContainsExisting || newBookingTouchesExisting;
     }
 
     @Override

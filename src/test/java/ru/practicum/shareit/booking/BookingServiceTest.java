@@ -95,10 +95,6 @@ class BookingServiceTest {
         item.setOwner(owner);
         item.setAvailable(false);
 
-        Booking booking = DataTest.testFutureBooking1();
-        booking.setBooker(booker);
-        booking.setItem(item);
-
         BookingDtoIn bookingDtoIn = DataTest.testBookingDtoIn2();
         bookingDtoIn.setItemId(item.getId());
 
@@ -126,10 +122,6 @@ class BookingServiceTest {
         Item item = DataTest.testItem1();
         item.setOwner(owner);
 
-        Booking booking = DataTest.testFutureBooking1();
-        booking.setBooker(owner);
-        booking.setItem(item);
-
         BookingDtoIn bookingDtoIn = DataTest.testBookingDtoIn2();
         bookingDtoIn.setItemId(item.getId());
 
@@ -150,6 +142,9 @@ class BookingServiceTest {
         verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
     }
 
+    /**
+     * Новое бронирование не может быть создано во временных рамках существующего
+     */
     @Test
     void createBookingInCrossedDatesThrowExceptionTest() {
         User owner = DataTest.testUser1();
@@ -157,10 +152,6 @@ class BookingServiceTest {
 
         Item item = DataTest.testItem1();
         item.setOwner(owner);
-
-        Booking booking = DataTest.testFutureBooking1();
-        booking.setBooker(booker);
-        booking.setItem(item);
 
         Booking crossedBookingInDate = DataTest.testCrossWithBookingDtoIn1();
         crossedBookingInDate.setItem(item);
@@ -189,6 +180,9 @@ class BookingServiceTest {
         verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
     }
 
+    /**
+     * Бронь не должна заканчиваться во время существующего бронирования
+     */
     @Test
     void createBookingInCrossedDatesStartBeforeThrowExceptionTest() {
         User owner = DataTest.testUser1();
@@ -196,10 +190,6 @@ class BookingServiceTest {
 
         Item item = DataTest.testItem1();
         item.setOwner(owner);
-
-        Booking booking = DataTest.testFutureBooking1();
-        booking.setBooker(booker);
-        booking.setItem(item);
 
         Booking crossedBookingStartBefore = DataTest.testCrossWithBookingDtoIn2();
         crossedBookingStartBefore.setItem(item);
@@ -228,6 +218,9 @@ class BookingServiceTest {
         verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
     }
 
+    /**
+     * Начало нового бронирования не должно быть во время существующего
+     */
     @Test
     void createBookingInCrossedDatesEndAfterThrowExceptionTest() {
         User owner = DataTest.testUser1();
@@ -235,10 +228,6 @@ class BookingServiceTest {
 
         Item item = DataTest.testItem1();
         item.setOwner(owner);
-
-        Booking booking = DataTest.testFutureBooking1();
-        booking.setBooker(booker);
-        booking.setItem(item);
 
         Booking crossedBookingEndAfter = DataTest.testCrossWithBookingDtoIn3();
         crossedBookingEndAfter.setItem(item);
@@ -266,6 +255,83 @@ class BookingServiceTest {
         verify(bookingRepository, times(1)).findByItemIdAndStatus(eq(item.getId()), eq(StatusOfBooking.APPROVED));
         verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
     }
+
+    /**
+     * Начало нового бронирования не должно быть одновременно с окончанием существующего
+     */
+    @Test
+    void createBookingInCrossedDatesStartInParallelEndThrowExceptionTest() {
+        User owner = DataTest.testUser1();
+        User booker = DataTest.testUser2();
+
+        Item item = DataTest.testItem1();
+        item.setOwner(owner);
+
+        Booking crossedBookingInParallel = DataTest.testCrossWithBookingDtoIn4();
+        crossedBookingInParallel.setItem(item);
+
+        BookingDtoIn bookingDtoIn = DataTest.testBookingDtoIn();
+        bookingDtoIn.setItemId(item.getId());
+
+        when(userRepository.findById(eq(booker.getId()))).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(eq(item.getId()))).thenReturn(Optional.of(item));
+        when(bookingRepository.findByItemIdAndStatus(eq(item.getId()), eq(StatusOfBooking.APPROVED)))
+                .thenReturn(List.of(crossedBookingInParallel));
+
+
+        BookingAvailableException exception = assertThrows(
+                BookingAvailableException.class,
+                () -> bookingService.createBooking(booker.getId(), bookingDtoIn),
+                "Должно быть выброшено исключение"
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
+        assertEquals("Вещь забронирована на запрашиваемые даты", exception.getMessage());
+
+        verify(userRepository, times(1)).findById(eq(booker.getId()));
+        verify(itemRepository, times(1)).findById(eq(item.getId()));
+        verify(bookingRepository, times(1)).findByItemIdAndStatus(eq(item.getId()), eq(StatusOfBooking.APPROVED));
+        verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
+    }
+
+    /**
+     * Окончание нового бронирования не должно быть одновременно со стартом существующего
+     */
+    @Test
+    void createBookingInCrossedDatesEndInParallelStartThrowExceptionTest() {
+        User owner = DataTest.testUser1();
+        User booker = DataTest.testUser2();
+
+        Item item = DataTest.testItem1();
+        item.setOwner(owner);
+
+        Booking crossedBookingInParallel = DataTest.testCrossWithBookingDtoIn5();
+        crossedBookingInParallel.setItem(item);
+
+        BookingDtoIn bookingDtoIn = DataTest.testBookingDtoIn();
+        bookingDtoIn.setItemId(item.getId());
+
+        when(userRepository.findById(eq(booker.getId()))).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(eq(item.getId()))).thenReturn(Optional.of(item));
+        when(bookingRepository.findByItemIdAndStatus(eq(item.getId()), eq(StatusOfBooking.APPROVED)))
+                .thenReturn(List.of(crossedBookingInParallel));
+
+
+        BookingAvailableException exception = assertThrows(
+                BookingAvailableException.class,
+                () -> bookingService.createBooking(booker.getId(), bookingDtoIn),
+                "Должно быть выброшено исключение"
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
+        assertEquals("Вещь забронирована на запрашиваемые даты", exception.getMessage());
+
+        verify(userRepository, times(1)).findById(eq(booker.getId()));
+        verify(itemRepository, times(1)).findById(eq(item.getId()));
+        verify(bookingRepository, times(1)).findByItemIdAndStatus(eq(item.getId()), eq(StatusOfBooking.APPROVED));
+        verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
+    }
+
 
     @Test
     void updateStatusTest() {

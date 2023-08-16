@@ -280,6 +280,30 @@ public class DataTest {
         return booking;
     }
 
+    /**
+     * @return бронь начинается одновременно с окончанием имеющейся брони
+     */
+    public static Booking testCrossWithBookingDtoIn4() {
+        Booking booking = new Booking();
+        booking.setId(7L);
+        booking.setStatus(StatusOfBooking.APPROVED);
+        booking.setStart(time);
+        booking.setEnd(time.plusHours(1));
+        return booking;
+    }
+
+    /**
+     * @return бронь заканчивается одновременно с началом уже имеющейся брони
+     */
+    public static Booking testCrossWithBookingDtoIn5() {
+        Booking booking = new Booking();
+        booking.setId(8L);
+        booking.setStatus(StatusOfBooking.APPROVED);
+        booking.setStart(time.plusHours(5));
+        booking.setEnd(time.plusHours(6));
+        return booking;
+    }
+
     public static Booking testFutureBooking2() {
         Booking booking = new Booking();
         booking.setId(5L);
