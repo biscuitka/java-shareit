@@ -17,7 +17,9 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.EntityValidator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -57,10 +59,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
         List<Item> items = itemRepository.findAllByItemRequestIdIn(requestIds);
+
+        Map<Long, List<Item>> itemsByRequestId = items.stream()
+                .collect(Collectors.groupingBy(
+                        item -> item.getItemRequest().getId(),
+                        Collectors.toList()
+                ));
         return requests.stream()
-                .map((ItemRequest request) -> RequestMapper.fromRequestToDtoWithItemsOut(request, items))
+                .map(request -> RequestMapper.fromRequestToDtoWithItemsOut(
+                        request, itemsByRequestId.getOrDefault(request.getId(), new ArrayList<>())))
                 .collect(Collectors.toList());
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -71,8 +81,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
         List<Item> items = itemRepository.findAllByItemRequestIdIn(requestIds);
+
+        Map<Long, List<Item>> itemsByRequestId = items.stream()
+                .collect(Collectors.groupingBy(
+                        item -> item.getItemRequest().getId(),
+                        Collectors.toList()
+                ));
+
         return requests.stream()
-                .map((ItemRequest request) -> RequestMapper.fromRequestToDtoWithItemsOut(request, items))
+                .map(request -> RequestMapper.fromRequestToDtoWithItemsOut(
+                        request, itemsByRequestId.getOrDefault(request.getId(), new ArrayList<>())))
                 .collect(Collectors.toList());
     }
 }
