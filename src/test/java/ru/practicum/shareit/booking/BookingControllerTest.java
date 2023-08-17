@@ -115,7 +115,7 @@ class BookingControllerTest {
         BookingDtoOut bookingDtoOut2 = DataTest.testBookingDtoOut2();
         List<BookingDtoOut> bookingDtoOutList = List.of(bookingDtoOut1, bookingDtoOut2);
 
-        when(bookingService.getAllBookingByUser(eq(DataTest.userId), any(),any(Pageable.class)))
+        when(bookingService.getAllBookingByUser(eq(DataTest.userId), any(), any(Pageable.class)))
                 .thenReturn(bookingDtoOutList);
 
         mockMvc.perform(get(bookingsPath)

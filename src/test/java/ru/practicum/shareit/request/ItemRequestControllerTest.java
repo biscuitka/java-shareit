@@ -114,7 +114,7 @@ class ItemRequestControllerTest {
         RequestDtoWithItemsOut requestDto2 = DataTest.testRequestDtoWithItemsOut2();
         List<RequestDtoWithItemsOut> requestDtoWithItemsOutList = List.of(requestDto1, requestDto2);
 
-        when(itemRequestService.getAll(eq(DataTest.userId),any(Pageable.class)))
+        when(itemRequestService.getAll(eq(DataTest.userId), any(Pageable.class)))
                 .thenReturn(requestDtoWithItemsOutList);
 
         mockMvc.perform(get("/requests/all")

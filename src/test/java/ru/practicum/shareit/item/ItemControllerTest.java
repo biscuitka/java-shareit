@@ -176,7 +176,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[1].available")
                         .value(itemDto2.getAvailable()));
 
-        verify(itemService, times(1)).getBySearch(anyString(),any(Pageable.class));
+        verify(itemService, times(1)).getBySearch(anyString(), any(Pageable.class));
         verifyNoMoreInteractions(itemService);
     }
 
