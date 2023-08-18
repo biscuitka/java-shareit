@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoRequested;
+import ru.practicum.shareit.item.dto.ItemDtoShort;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -22,12 +24,36 @@ public class ItemMapper {
         dto.setName(item.getName());
         dto.setDescription(item.getDescription());
         dto.setAvailable(item.getAvailable());
+        dto.setRequestId((item.getItemRequest() != null) ? item.getItemRequest().getId() : null);
         return dto;
+    }
+
+    public static ItemDtoRequested fromItemToItemDtoRequested(Item item) {
+        ItemDtoRequested dto = new ItemDtoRequested();
+        dto.setId(item.getId());
+        dto.setName(item.getName());
+        dto.setDescription(item.getDescription());
+        dto.setAvailable(item.getAvailable());
+        dto.setRequestId(item.getItemRequest().getId());
+        return dto;
+    }
+
+    public static ItemDtoShort fromItemToItemDtoShort(Item item) {
+        ItemDtoShort itemDtoShort = new ItemDtoShort();
+        itemDtoShort.setId(item.getId());
+        itemDtoShort.setName(item.getName());
+        return itemDtoShort;
     }
 
     public static List<ItemDto> fromListOfItemToDto(List<Item> items) {
         return items.stream()
                 .map(ItemMapper::fromItemToDto)
+                .collect(Collectors.toList());
+    }
+
+    public static List<ItemDtoRequested> fromListOfItemToDtoRequested(List<Item> items) {
+        return items.stream()
+                .map(ItemMapper::fromItemToItemDtoRequested)
                 .collect(Collectors.toList());
     }
 }

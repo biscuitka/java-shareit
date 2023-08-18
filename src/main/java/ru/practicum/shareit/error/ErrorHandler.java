@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.exception.AccessDeniedException;
+import ru.practicum.shareit.exception.BookingAvailableException;
+import ru.practicum.shareit.exception.IncorrectException;
+import ru.practicum.shareit.exception.NotFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -44,13 +47,6 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAccessDeniedException(final AccessDeniedException exp) {
         log.error("Ошибка доступа", exp);
-        return new ErrorResponse(exp.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleExistException(final ExistException exp) {
-        log.error("Объект уже существует", exp);
         return new ErrorResponse(exp.getMessage());
     }
 

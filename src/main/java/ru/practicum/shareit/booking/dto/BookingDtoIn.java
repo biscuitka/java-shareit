@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Data
 public class BookingDtoIn {
 
-
     @NotNull
     @FutureOrPresent(message = "Дата начала не может быть в прошлом")
     private LocalDateTime start;

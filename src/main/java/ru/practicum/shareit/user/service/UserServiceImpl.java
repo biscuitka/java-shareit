@@ -24,14 +24,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = UserMapper.fromDtoToUser(userDto);
-        User createdUser = userRepository.save(user);
-        return UserMapper.fromUserToDto(createdUser);
+        try {
+            User createdUser = userRepository.save(user);
+            return UserMapper.fromUserToDto(createdUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ошибка при создании пользователя", e);
+        }
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
         try {
-            User userInRepo = getValidatedUser(userRepository, userId);
+            User userInRepo = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
             if (userDto.getName() != null) {
                 userInRepo.setName(userDto.getName());
             }
@@ -48,7 +53,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto getUserById(long userId) {
-        User user = getValidatedUser(userRepository, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
         return UserMapper.fromUserToDto(user);
 
     }
@@ -64,10 +70,5 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(long userId) {
         userRepository.deleteById(userId);
-    }
-
-    public static User getValidatedUser(UserRepository userRepository, long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 }
