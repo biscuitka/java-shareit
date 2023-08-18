@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.EntityValidator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +35,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
         try {
-            User userInRepo = EntityValidator.getValidatedUser(userRepository, userId);
+            User userInRepo = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
             if (userDto.getName() != null) {
                 userInRepo.setName(userDto.getName());
             }
@@ -52,7 +53,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto getUserById(long userId) {
-        User user = EntityValidator.getValidatedUser(userRepository, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
         return UserMapper.fromUserToDto(user);
 
     }

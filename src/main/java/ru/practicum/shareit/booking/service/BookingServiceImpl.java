@@ -19,7 +19,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.EntityValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,8 +33,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoOut createBooking(long userId, BookingDtoIn bookingDtoIn) {
-        User booker = EntityValidator.getValidatedUser(userRepository, userId);
-        Item item = EntityValidator.getValidatedItem(itemRepository, bookingDtoIn.getItemId());
+        User booker = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(bookingDtoIn.getItemId())
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена", HttpStatus.NOT_FOUND));
         if (!item.getAvailable()) {
             throw new BookingAvailableException("Вещь недоступна для бронирования", HttpStatus.BAD_REQUEST);
         }
@@ -83,8 +84,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoOut updateStatus(long userId, boolean approved, long bookingId) {
-        Booking booking = EntityValidator.getValidatedBooking(bookingRepository, bookingId);
-        EntityValidator.getValidatedUser(userRepository, userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено", HttpStatus.NOT_FOUND));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
 
         if (booking.getItem().getOwner().getId() != userId) {
             throw new NotFoundException("Только владелец может подтвердить/отклонить бронь", HttpStatus.NOT_FOUND);
@@ -102,8 +105,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public BookingDtoOut getBooking(long userId, long bookingId) {
-        Booking booking = EntityValidator.getValidatedBooking(bookingRepository, bookingId);
-        EntityValidator.getValidatedUser(userRepository, userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено", HttpStatus.NOT_FOUND));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
 
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
             throw new NotFoundException("Для данного пользователя бронирования не найдены", HttpStatus.NOT_FOUND);
@@ -114,7 +119,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDtoOut> getAllBookingByUser(long userId, StateOfBooking stateOfBooking, Pageable pageable) {
-        EntityValidator.getValidatedUser(userRepository, userId);
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
         LocalDateTime now = LocalDateTime.now();
         switch (stateOfBooking) {
             case ALL:
@@ -144,7 +150,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDtoOut> getAllBookingsByItemOwner(long userId, StateOfBooking stateOfBooking, Pageable pageable) {
-        EntityValidator.getValidatedUser(userRepository, userId);
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
         LocalDateTime now = LocalDateTime.now();
         switch (stateOfBooking) {
             case ALL:

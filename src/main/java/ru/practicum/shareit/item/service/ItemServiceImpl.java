@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.model.StatusOfBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.IncorrectException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -23,7 +24,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.EntityValidator;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -41,12 +41,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createItem(ItemDto itemDto, Long userId) {
-        User owner = EntityValidator.getValidatedUser(userRepository, userId);
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
         Item item = ItemMapper.fromDtoToItem(itemDto);
         item.setOwner(owner);
         Long requestId = itemDto.getRequestId();
         if (requestId != null) {
-            ItemRequest request = EntityValidator.getValidatedRequest(requestRepository, requestId);
+            ItemRequest request = requestRepository.findById(requestId)
+                    .orElseThrow(() -> new NotFoundException("Запрос не найден", HttpStatus.NOT_FOUND));
             item.setItemRequest(request);
         }
         Item createdItem = itemRepository.save(item);
@@ -56,8 +58,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(long userId, CommentDto commentDto, long itemId) {
-        User user = EntityValidator.getValidatedUser(userRepository, userId);
-        Item item = EntityValidator.getValidatedItem(itemRepository, itemId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден", HttpStatus.NOT_FOUND));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена", HttpStatus.NOT_FOUND));
         Comment comment = CommentMapper.fromDtoToComment(commentDto);
 
         if (bookingRepository.findAllByItemIdAndBookerIdAndEndBeforeAndStatus(
@@ -75,7 +79,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
-        Item oldItem = EntityValidator.getValidatedItem(itemRepository, itemId);
+        Item oldItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена", HttpStatus.NOT_FOUND));
         if (oldItem.getOwner().getId() != userId) {
             throw new AccessDeniedException("Пользователь не является владельцем объекта", HttpStatus.FORBIDDEN);
         }
@@ -95,7 +100,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemDto getById(long itemId, long userId) {
-        Item item = EntityValidator.getValidatedItem(itemRepository, itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена", HttpStatus.NOT_FOUND));
         ItemDto itemDto = ItemMapper.fromItemToDto(item);
         setComments(itemDto);
         if (item.getOwner().getId() == userId) {
